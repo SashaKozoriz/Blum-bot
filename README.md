@@ -13,7 +13,7 @@ markdownCopy# Telegram Game Automation Script
 - keyboard
 
 Ви можете встановити необхідні бібліотеки за допомогою pip:
-"pip install opencv-python numpy mss pyautogui pygetwindow keyboard"
+`pip install opencv-python numpy mss pyautogui pygetwindow keyboard`
 
 ## Налаштування
 1. Переконайтеся, що у вас встановлений Telegram Desktop і відкрита потрібна гра.
@@ -27,7 +27,7 @@ markdownCopy# Telegram Game Automation Script
 ## Використання
 1. Запустіть скрипт:
 
-"python click_green_objects.py"
+`python click_green_objects.py`
 
 2. Скрипт автоматично знайде вікно Telegram Desktop і почне моніторинг гри.
 
