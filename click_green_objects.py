@@ -53,7 +53,6 @@ def main():
 
             base_path = get_base_path()
 
-            # Load templates outside of the main loop
             templates = {
                 'play_button': cv2.imread(os.path.join(base_path, 'play_button.png'), 0),
                 'close_button': cv2.imread(os.path.join(base_path, 'close_button.png'), 0),
@@ -65,28 +64,44 @@ def main():
                 print("Failed to load templates. Please ensure all template files exist.")
                 return
 
-            print("Script is running. Press 'q' to stop.")
+            print("Script is running. Press 'q' to stop or 'r' to restart.")
             
             last_click = None
             button_timers = {'play_button': 0, 'close_button': 0}
             button_found_time = {'play_button': 0, 'close_button': 0}
             object_positions = {}
+            last_object_found_time = time.time()
             
             with mss() as sct:
                 with ThreadPoolExecutor(max_workers=4) as executor:
                     while not keyboard.is_pressed('q'):
+                        if keyboard.is_pressed('r'):
+                            print("Restarting script...")
+                            break
+
                         screenshot = np.array(sct.grab(monitor))
                         frame = cv2.cvtColor(screenshot, cv2.COLOR_RGBA2BGR)
                         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                         
                         futures = [executor.submit(find_object_task, gray_frame, template, name) for name, template in templates.items()]
                         
+                        objects_found = False
                         for future in as_completed(futures):
                             name, objects = future.result()
                             if objects:
                                 object_positions[name] = objects
+                                objects_found = True
                         
                         current_time = time.time()
+                        
+                        if objects_found:
+                            last_object_found_time = current_time
+                        elif current_time - last_object_found_time > 10:
+                            center_x = monitor["left"] + monitor["width"] // 2
+                            center_y = monitor["top"] + monitor["height"] // 2
+                            pyautogui.click(center_x, center_y)
+                            print(f"No objects found for 10 seconds. Clicked center: ({center_x}, {center_y})")
+                            last_object_found_time = current_time
                         
                         for button in ['play_button', 'close_button']:
                             if button in object_positions:
@@ -106,13 +121,14 @@ def main():
                         
                         time.sleep(0.01)
             
-            print("Script stopped.")
+            if keyboard.is_pressed('q'):
+                print("Script stopped.")
+                break
+            
         except Exception as e:
             print(f"An error occurred: {e}")
-        
-        user_input = input("Press 'r' to restart the script, or any other key to exit: ")
-        if user_input.lower() != 'r':
-            break
+            print("Restarting script in 5 seconds...")
+            time.sleep(5)
 
 def click_position(button, obj, left, top, templates):
     """Handles the calculation and execution of clicks based on button type."""
