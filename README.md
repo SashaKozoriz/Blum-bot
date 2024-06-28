@@ -13,6 +13,7 @@ markdownCopy# Telegram Game Automation Script
 - keyboard
 
 Ви можете встановити необхідні бібліотеки за допомогою pip:
+
 `pip install opencv-python numpy mss pyautogui pygetwindow keyboard`
 
 ## Налаштування
